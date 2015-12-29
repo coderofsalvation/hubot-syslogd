@@ -30,7 +30,10 @@ logserver.outputs.push ( (app,data) ->
       if filter.regex?
         parts = filter.regex.split("/")
         if parts[1]? and String(data.message).match( new RegExp(parts[1]) )
-          logserver.robot.reply output, String(data.message) for output in filter.output
+          for output in filter.output
+            output.user.name = filtername if output.user?.name? and output.room?
+            output.message.user.name = filtername if output.message.user?.name? and output.room?
+            logserver.robot.reply output, String(data.message) 
 ).bind({})
 
 module.exports = (robot) ->
@@ -109,13 +112,14 @@ module.exports = (robot) ->
         regex: regex
         output: [ msg.envelope ]
         forward: []
+      console.log JSON.stringify(config,null,2)
       robot.brain.set 'syslog', config
     else 
-      add = true
+      roomexist = false; userexist = false 
       for output in config.filter[ id ].output
-        add = false if output.room? and output.room == msg.envelope.room
-        add = false if output.user?.name? and output.user.name == msg.envelope.user.name
-      if add
+        roomexist = true if output.room? and output.room == msg.envelope.room
+        userexist = true if output.user?.name? and output.user.name == msg.envelope.user.name
+      if not roomexist or not userexist 
         config.filter[ id ].output.push msg.envelope 
         msg.send "added to filter '"+id+"'"
       else
@@ -158,29 +162,6 @@ module.exports = (robot) ->
       cfg[ variable ] = value
     robot.brain.set 'syslog', unflat(cfg)
     msg.send "'#{variable}' set to '#{value}'"
-  
-  # Catch-all listener to mute responses
-  #robot.hear /(.*)$/i, {id: "hubot-syslog"}, (msg) ->
-  #  console.dir msg
-  #  if mute_all is false and mute_channels.indexOf(process.env.HUBOT_MUTE_ROOM_PREFIX + msg.message.room) == -1
-  #    return
-  #  if msg.match[1].indexOf('mute') != -1
-  #    return
-
-  #  #msg.finish()
-
-  #  #if msg.match[0].toLowerCase().indexOf(robot.name.toLowerCase()) != 0
-  #    return
-
-  #  #reason = if mute_all is true then 'All channels are muted' else "Channel #{process.env.HUBOT_MUTE_ROOM_PREFIX}#{msg.message.room} is muted"
-  #  #if !mute_explain[msg.message.room]?
-  #  #  msg.send 'This channel is currently muted because: ' + reason
-  #  #  mute_explain[msg.message.room] = true
-  #  #  delay 300000, ->
-  #  #    delete mute_explain[msg.message.room]
-
-  #mute_listener = robot.listeners.pop()
-  #robot.listeners.unshift(mute_listener)
         
   robot.brain.set 'foo','bar' # this triggers 'loaded' event ..WHY?
 

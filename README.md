@@ -1,6 +1,7 @@
 # hubot-syslogd
 
-flexible monitoring and aggregation of logs by using hubot as syslog server.
+Flexible monitoring, aggregation and formatting of logs by using hubot as syslog server.
+Hubot-syslogd allows you to pre-massage/route log messages before sending them to Splunk/Papertrail/Logsene etc.
 
 # Installation 
 
@@ -8,15 +9,17 @@ flexible monitoring and aggregation of logs by using hubot as syslog server.
 
 # Usage:
 
-Just invite hubot to a channel, and tell him which regex to watch:
+Just invite hubot to a channel, or add him to a private chat, and tell him which regex to watch:
 
     hubot syslog add errors /(error|ERROR)/
 
-and then send a syslog message:
+and then send a syslog message using a syslog client:
   
-  $ logger -d -P 1338 -p local3.info hello this is foobar 
+  $ logger -d -P 1338 -p local3.info hello this is an error 
 
-> Voila! It'll show up in the channel/query since it matched the regex :)
+> Voila! It'll show up in the chat since it matched the regex :)
+
+    [15:29] <hubot> errors: hello this is an error 
 
 ## Design
 
@@ -24,7 +27,14 @@ and then send a syslog message:
 
 ## sending JSON / Text formatting 
 
-  $ logger -d -P 1338 -i -p local3.info -t FLOP '{"flop":"flap","template":"foobar {{indent:10:flop}}::{{indent:10:priority}}'"$(date)"'"}';
+    $ logger -d -P 1338 -i -p local3.info -t FLOP '{"flop":"flap","template":"foobar {{indent:10:flop}}::{{indent:10:priority}} errors"}';
+
+will produce in the chat:
+
+    [15:29] <hubot> errors: foobar flap       ::158        error 
+    [15:29] <hubot> errors: foobar flap       ::159        error 
+
+This allows more readable logs, and/or pretty forwarded messages (to papertrail/slack/splunk etc)
 
 > See [syslogd-middleware](https://npmjs.org/syslogd-middleware) for more templating options
 
