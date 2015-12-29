@@ -1,7 +1,4 @@
-# hubot-syslogd
-
-Flexible monitoring, aggregation and formatting of logs by using hubot as syslog server.
-Hubot-syslogd allows you to pre-massage/route log messages before sending them to Splunk/Papertrail/Logsene etc.
+Pre-massage/route log messages before sending them to Splunk/Papertrail/Logsene etc.
 
 # Installation 
 
@@ -15,7 +12,7 @@ Just invite hubot to a channel, or add him to a private chat, and tell him which
 
 and then send a syslog message using a syslog client:
   
-  $ logger -d -P 1338 -p local3.info hello this is an error 
+    $ logger -d -P 1338 -p local3.info hello this is an error 
 
 > Voila! It'll show up in the chat since it matched the regex :)
 
