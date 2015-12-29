@@ -10,7 +10,7 @@ Just invite hubot to a channel, or add him to a private chat, and tell him which
 
     hubot syslog add errors /(error|ERROR)/
 
-and then send a syslog message using a syslog client:
+and then send a syslog message using a [PHP](https://github.com/coderofsalvation/syslog-flexible) / [JS](https://npmjs.org/syslog-client) syslog client, or on unix:
   
     $ logger -d -P 1338 -p local3.info hello this is an error 
 
