@@ -1,4 +1,3 @@
-Byebye logfiles, welcome streams.
 Pre-massage/route log messages before sending them to Splunk/Papertrail/Logsene etc.
 
 # Installation 
@@ -13,7 +12,7 @@ Just invite hubot to a channel, or add him to a private chat, and tell him which
 
 and then send a syslog message using a [PHP](https://github.com/coderofsalvation/syslog-flexible) / [JS](https://npmjs.org/syslog-client) syslog client, or on unix:
   
-    $ logger -d -P 1338 -p local3.info hello this is an error 
+    $ logger -d -n localhost -P 1338 -p local3.info hello this is an error 
 
 > Voila! It'll show up in the chat since it matched the regex :)
 
@@ -22,6 +21,14 @@ and then send a syslog message using a [PHP](https://github.com/coderofsalvation
 ## Design
 
 <img src="https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgSFVCT1QtU1lTTE9HIEZMT1cKCnN5c2xvZ2NsaWVudC0-aHVib3Q6IHB1c2ggVURQL1RDUCBsb2cgbWVzc2FnZXMKABwFAB8JcmVnZXggbWF0Y2g_AAwPZm9ybWF0ADEIACsNIGNoYW5uZWxzL3VzZXJzACcFd2FyZABVCG90aGVyIHNlcnZpY2UAFQogCm5vdGUgcmlnaHQgb2YgABcQYWxlcnRpbmcgYW5kIG1ldHJpY3MgXG51c2luZzogXG4qIHBhcGVydHJhaWxcbiogc3BsdW5rXG4qIGxvZ2dseQAeBWxvZ3N0YXNoXG4AXw8AghMHSACBPAVhY3RzIGFzIACCNwYAgSYFZXIK&s=napkin"/>
+
+## Email alerts anyone?
+
+just get a papertrail account and forward 'errors' to papertrail/Splunk etc, by sending this to hubot:
+
+    hubot syslog config filter.errors.forward.0 udp://yourhost.papertrailapp.com:yourport
+
+And configure alerts in their dashboards.
 
 ## sending JSON / Text formatting 
 
@@ -39,11 +46,23 @@ This allows more readable logs, and/or pretty forwarded messages (to papertrail/
 ## All commands:
 
     hubot syslog                           - get overview of filters 
-    hubot syslog config [variable] [value] - show/edit filter config
+    hubot syslog config [variable] [value] - show [or edit] filter config
     hubot syslog add <id> [regex]          - add filter (or enable in current query/channel)
     hubot syslog remove <id>               - stop and remove a filter 
 
-## A quick tryout
+## Forward messages / Backup / Files
+
+Additionaly you could forward the logmessages to:
+
+* a rsyslog unix daemons (which can save to files, including logrotate etc)
+* a SaaS logservices (splunk/papertrail etc)
+    
+Just add their syslog-serverinfo like this:    
+    
+    hubot syslog config filter.errors.forward.0 udp://localhost:514 
+    hubot syslog config filter.errors.forward.1 tcp://someserver:567
+
+## Quick tryout
 
 This plugin should work out of the box with your existing setup.
 However, here's a quick tryout scenario:
@@ -56,6 +75,8 @@ However, here's a quick tryout scenario:
 This is just a testbot which should connect to the __#hubot-syslog__ channel of __irc.freenode.net__.
 
 ## Philosphy: a syslogd replacement
+
+> (NG-/R)Syslog is great, but its configuration can become herculean quite fast.
 
 Hubot-syslog uses [syslog-middleware](https://npmjs.org/syslogd-middleware), therefore it is
 highly extendable, syslog-compatible UDP/TCP loggingdaemon with use()-middleware support (like express).

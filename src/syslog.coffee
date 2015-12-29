@@ -17,8 +17,15 @@ ascii     = require('easy-table')
 flat      = require('flat')
 unflat    = require('flat').unflatten
 logserver = require 'syslogd-middleware'
+syslogclient = require("syslog-client");
+dns       = require 'dns'
 
-# initialize syslog server
+if not process.env.DEBUG? # *FIXME* syslog-client does a console.dir :(
+  console.dir = () -> f=f 
+
+##
+# initialize syslog server and forwarder
+##
 logserver.config = false
 require('syslogd-middleware/src/input/syslog')(logserver)
 logserver.use require('syslogd-middleware/src/parser/syslog')
@@ -30,10 +37,35 @@ logserver.outputs.push ( (app,data) ->
       if filter.regex?
         parts = filter.regex.split("/")
         if parts[1]? and String(data.message).match( new RegExp(parts[1]) )
+          # send to channels
           for output in filter.output
             output.user.name = filtername if output.user?.name? and output.room?
             output.message.user.name = filtername if output.message.user?.name? and output.room?
             logserver.robot.reply output, String(data.message) 
+          # Forward to remote services
+          for forward in filter.forward
+            continue if forward == "udp://hostname:port"
+            logserver.forwarder = {} if not logserver.forwarder
+            if not logserver.forwarder[ forward ]?
+              _protocol = forward.split("://")[0]
+              _server = forward.split("://")[1].split(":")
+              ( (forward,server,protocol) ->
+                dns.resolve4 server[0], (err, addresses) ->
+                  if err or not addresses.length 
+                    console.error "could not resolve: "+server[0]
+                    return
+                  console.log "creating "+protocol+" forwarder to '"+server[0]+"' on port "+server[1] if process.env.DEBUG?
+                  logserver.forwarder[ forward ] = syslogclient.createClient addresses[0],
+                    transport: (if protocol is "tcp" then syslogclient.Transport.Tcp else syslogclient.Transport.Udp),
+                    port: server[1]
+                  logserver.forwarder[ forward ].on 'error', -> console.dir arguments 
+              )(forward,_server,_protocol)
+            console.log "forward::"+forward if process.env.DEBUG?
+            if logserver.forwarder[ forward ]?
+              logserver.forwarder[ forward ].log data.message,       # *FIXME* please reflect syslog message
+                facility: syslogclient.Facility.Local0               #
+                severity: syslogclient.Severity.Informational        #
+              , () -> #f=f
 ).bind({})
 
 module.exports = (robot) ->
@@ -57,7 +89,6 @@ module.exports = (robot) ->
     if formatstyle is 'flat'
       rows = [] ; rows.push {variable:k,value:v} for k,v of flat(data)
       return "\n"+format rows, "ascii" 
-      
 
   merge = (source, obj, clone) ->
     return source if source == null
@@ -104,15 +135,14 @@ module.exports = (robot) ->
     args = msg.match[1].split(" ")
     id = args[0].replace(/\./g,'-')
     regex = args[1]
-    #msg.envelope.message.room
-    console.dir msg.envelope
+    console.dir msg.envelope if process.env.DEBUG?
     config = {filter:{}} if not config
     if not config.filter[ id ]?
       config.filter[ id ] =
         regex: regex
         output: [ msg.envelope ]
-        forward: []
-      console.log JSON.stringify(config,null,2)
+        forward: ["udp://hostname:port"]
+      console.log JSON.stringify(config,null,2) if process.env.DEBUG?
       robot.brain.set 'syslog', config
     else 
       roomexist = false; userexist = false 

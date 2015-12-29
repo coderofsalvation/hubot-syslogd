@@ -1,6 +1,6 @@
 {
   "name": "hubot-syslogd",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "flexible monitoring, aggregation and formatting of logs by using hubot as syslog server",
   "main": "index.coffee",
   "scripts": {
@@ -13,6 +13,7 @@
   "dependencies": {
     "easy-table": "^1.0.0",
     "flat": "^1.6.0",
+    "syslog-client": "^1.0.6",
     "syslogd-middleware": "^1.0.31"
   },
   "keywords": [
