@@ -1,3 +1,4 @@
+Byebye logfiles, welcome streams.
 Pre-massage/route log messages before sending them to Splunk/Papertrail/Logsene etc.
 
 # Installation 
