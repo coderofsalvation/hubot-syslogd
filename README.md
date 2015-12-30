@@ -1,14 +1,23 @@
 Pre-massage/route log messages before sending them to Splunk/Papertrail/Logsene etc.
 
+<img src="https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgSFVCT1QtU1lTTE9HIEZMT1cKCnN5c2xvZ2NsaWVudC0-aHVib3Q6IHB1c2ggVURQL1RDUCBsb2cgbWVzc2FnZXMKABwFAB8JcmVnZXggbWF0Y2g_AAwPZm9ybWF0ADEIACsNIGNoYW5uZWxzL3VzZXJzACcFd2FyZABVCG90aGVyIHNlcnZpY2UAFQogCm5vdGUgcmlnaHQgb2YgABcQYWxlcnRpbmcgYW5kIG1ldHJpY3MgXG51c2luZzogXG4qIHBhcGVydHJhaWxcbiogc3BsdW5rXG4qIGxvZ2dseQAeBWxvZ3N0YXNoXG4AXw8AghMHSACBPAVhY3RzIGFzIACCNwYAgSYFZXIK&s=napkin"/>
+
+
 # Installation 
 
     npm install hubot-syslogd
+
+> Overridable Environment variables
+
+* SYSLOG_HOST=127.0.0.1   
+* SYSLOG_UDP_PORT=1338
+* SYSLOG_TCP_PORT=1337   
 
 # Usage:
 
 Just invite hubot to a channel, or add him to a private chat, and tell him which regex to watch:
 
-    hubot syslog add errors /(error|ERROR)/
+    hubot syslog add errors /(error|fail)/gi
 
 and then send a syslog message using a [PHP](https://github.com/coderofsalvation/syslog-flexible) / [JS](https://npmjs.org/syslog-client) syslog client, or on unix:
   
@@ -17,10 +26,6 @@ and then send a syslog message using a [PHP](https://github.com/coderofsalvation
 > Voila! It'll show up in the chat since it matched the regex :)
 
     [15:29] <hubot> errors: hello this is an error 
-
-## Design
-
-<img src="https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgSFVCT1QtU1lTTE9HIEZMT1cKCnN5c2xvZ2NsaWVudC0-aHVib3Q6IHB1c2ggVURQL1RDUCBsb2cgbWVzc2FnZXMKABwFAB8JcmVnZXggbWF0Y2g_AAwPZm9ybWF0ADEIACsNIGNoYW5uZWxzL3VzZXJzACcFd2FyZABVCG90aGVyIHNlcnZpY2UAFQogCm5vdGUgcmlnaHQgb2YgABcQYWxlcnRpbmcgYW5kIG1ldHJpY3MgXG51c2luZzogXG4qIHBhcGVydHJhaWxcbiogc3BsdW5rXG4qIGxvZ2dseQAeBWxvZ3N0YXNoXG4AXw8AghMHSACBPAVhY3RzIGFzIACCNwYAgSYFZXIK&s=napkin"/>
 
 ## Email alerts anyone?
 

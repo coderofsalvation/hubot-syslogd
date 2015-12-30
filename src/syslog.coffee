@@ -36,7 +36,8 @@ logserver.outputs.push ( (app,data) ->
     for filtername,filter of logserver.config.filter
       if filter.regex?
         parts = filter.regex.split("/")
-        if parts[1]? and String(data.message).match( new RegExp(parts[1]) )
+        modifiers = (if parts[2]? then parts[2] else null )
+        if parts[1]? and String(data.message).match new RegExp(parts[1], modifiers )
           # send to channels
           for output in filter.output
             output.user.name = filtername if output.user?.name? and output.room?
