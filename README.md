@@ -1,6 +1,6 @@
 Pre-massage/route log messages before sending them to Splunk/Papertrail/Logsene etc.
 
-[Build Status](https://travis-ci.org/coderofsalvation/hubot-syslogd.svg?branch=master)
+[![Build Status](https://travis-ci.org/coderofsalvation/hubot-syslogd.svg?branch=master)]
 
 <img src="https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgSFVCT1QtU1lTTE9HIEZMT1cKCnN5c2xvZ2NsaWVudC0-aHVib3Q6IHB1c2ggVURQL1RDUCBsb2cgbWVzc2FnZXMKABwFAB8JcmVnZXggbWF0Y2g_AAwPZm9ybWF0ADEIACsNIGNoYW5uZWxzL3VzZXJzACcFd2FyZABVCG90aGVyIHNlcnZpY2UAFQogCm5vdGUgcmlnaHQgb2YgABcQYWxlcnRpbmcgYW5kIG1ldHJpY3MgXG51c2luZzogXG4qIHBhcGVydHJhaWxcbiogc3BsdW5rXG4qIGxvZ2dseQAeBWxvZ3N0YXNoXG4AXw8AghMHSACBPAVhY3RzIGFzIACCNwYAgSYFZXIK&s=napkin"/>
 
