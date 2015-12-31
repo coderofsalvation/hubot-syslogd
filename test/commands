@@ -1,0 +1,12 @@
+#!/usr/bin/expect -f
+spawn timeout 10 test/test.bash 
+sleep 3
+expect "Hubot>"
+send "hubot syslog\n"
+expect "empty"
+send "hubot syslog add errors /error/gi\n"
+expect "ok added"
+send "hubot syslog enable errors\n"
+expect "enabled"
+send "hubot syslog disable errors\n"
+expect "disabled"

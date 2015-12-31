@@ -12,4 +12,6 @@ export PATH=$PATH:node_modules/.bin
 export DEBUG=1 ;
 export FILE_BRAIN_PATH=$SELF_PATH
 
+rm $FILE_BRAIN_PATH/brain-dump.json
+
 hubot ${adapter} -r $SELF_PATH/scripts
