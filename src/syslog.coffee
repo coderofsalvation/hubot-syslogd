@@ -110,6 +110,10 @@ module.exports = (robot) ->
           source[prop] = obj[prop]
     source
 
+  get_config_options = (cfg,recursiondepth) ->
+    lines = format( cfg, 'flat' ).split("\n")
+    return ( line for line in lines when line.split(".").length < recursiondepth )
+
   # Persist reminders to the brain, on save event
   robot.brain.on 'save', ->
     if config
@@ -123,7 +127,7 @@ module.exports = (robot) ->
 
   enable = (id,msg) ->
     roomexist = false; userexist = false 
-    if config.filter[ id ]?
+    if config?.filter?[ id ]?
       for output in config.filter[ id ].output
         roomexist = true if output.room? and output.room == msg.envelope.room
         userexist = true if not _.isroom(msg.envelope) and output.user?.name? and output.user.name == msg.envelope.user.name
@@ -136,7 +140,7 @@ module.exports = (robot) ->
 
   disable = (id,msg) ->
     roomexist = false; userexist = false 
-    if config.filter[ id ]?
+    if config?.filter?[ id ]?
       deleted = false
       for output in config.filter[ id ].output
         matches_room = ( output.room? and output.room == msg.envelope.room )
@@ -201,7 +205,7 @@ module.exports = (robot) ->
     else msg.send "id '#{id}' does not exist"
   
   robot.respond /syslog config$/i, (msg) ->
-    msg.send format config, 'flat' 
+    return msg.send( get_config_options(config,6).join "\n" )
   
   robot.respond /syslog config (\S+)$/i, (msg) ->
     cfg = flat config
@@ -217,7 +221,11 @@ module.exports = (robot) ->
     cfg = flat(config)
     if cfg[ variable ]?
       if not value 
-        return msg.send ( if typeof cfg[ variable ] is "string" then cfg[ variable ] else format cfg[ variable ], 'flat' )
+        if typeof cfg[ variable ] is "string"
+          return msg.send cfg[ variable ] 
+        else 
+          # lets only print options with a recursion depth of 5
+          return msg.send( get_config_options( cfg[ variable ],6).join "\n" ) 
       else
         if value is "null"
           delete cfg[ variable ]
