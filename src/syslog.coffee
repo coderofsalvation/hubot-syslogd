@@ -23,7 +23,7 @@ syslogclient = require("syslog-client");
 dns       = require 'dns'
 _         =
   array_remove: (arr,value) -> (x for x in arr when x != value )
-  isroom: (msg) ->( msg.envelope?.room? and msg.envelope.room.length )
+  isroom: (envelope) ->( envelope?.room? and envelope.room.length and ( envelope.room != envelope.user.name )  )
 
 if not process.env.DEBUG? # *FIXME* syslog-client does a console.dir :(
   console.dir = () -> f=f 
@@ -126,7 +126,7 @@ module.exports = (robot) ->
     if config.filter[ id ]?
       for output in config.filter[ id ].output
         roomexist = true if output.room? and output.room == msg.envelope.room
-        userexist = true if not _.isroom(msg) and output.user?.name? and output.user.name == msg.envelope.user.name
+        userexist = true if not _.isroom(msg.envelope) and output.user?.name? and output.user.name == msg.envelope.user.name
       if not roomexist or not userexist 
         config.filter[ id ].output.push msg.envelope 
         msg.send "enabled '"+id+"' for "+ msg.envelope.room || msg.envelope.user.name
@@ -140,7 +140,7 @@ module.exports = (robot) ->
       deleted = false
       for output in config.filter[ id ].output
         matches_room = ( output.room? and output.room == msg.envelope.room )
-        matches_user = ( not _.isroom(msg) and output.user?.name? and output.user.name == msg.envelope.user.name )
+        matches_user = ( not _.isroom(msg.envelope) and output.user?.name? and output.user.name == msg.envelope.user.name )
         if matches_room or matches_user
           config.filter[ id ].output = _.array_remove config.filter[ id ].output, output 
           deleted = true
