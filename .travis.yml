@@ -3,6 +3,7 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y expect 
   - npm install coffee-script
+  - npm install --dev
 language: node_js
 node_js:
   - "4.1"
