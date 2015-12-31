@@ -4,6 +4,7 @@ before_install:
   - sudo apt-get install -y expect 
   - npm install coffee-script
   - npm install hubot
+  - npm install --production
 language: node_js
 node_js:
   - "4.1"
