@@ -13,11 +13,15 @@ Pre-massage/route log messages before sending them to Splunk/Papertrail/Logsene 
 * SYSLOG_UDP_PORT=1338
 * SYSLOG_TCP_PORT=1337   
 
-# Usage:
+## Usage:
 
-Just invite hubot to a channel, or add him to a private chat, and tell him which regex to watch:
+First tell hubot which regex to watch by typing to hubot:
 
-    hubot syslog add errors /(error|fail)/gi
+    hubot syslog add errors /(error|fail)/gi 
+   
+Then invite hubot to a channel, or add him to a private chat, and type this:
+
+    hubot enable errors
 
 and then send a syslog message using a [PHP](https://github.com/coderofsalvation/syslog-flexible) / [JS](https://npmjs.org/syslog-client) syslog client, or on unix:
   
@@ -37,11 +41,12 @@ And configure alerts in their dashboards.
 
 ## sending JSON / Text formatting 
 
-    $ logger -d -P 1338 -i -p local3.info -t FLOP '{"flop":"flap","template":"foobar {{indent:10:flop}}::{{indent:10:priority}} errors"}';
+    $ logger -d -P 1338 -i -p local3.info -t FLOP 'foobar {{indent:10:priority}}::ok'
+    $ logger -d -P 1338 -i -p local3.info -t FLOP '{"flop":"flap","template":"foobar {{indent:10:flop}}::{{indent:10:priority}} errors"}'
 
-will produce in the chat:
+will produce nice-aligned output in the chat:
 
-    [15:29] <hubot> errors: foobar flap       ::158        error 
+    [15:29] <hubot> errors: foobar 158        ::ok 
     [15:29] <hubot> errors: foobar flap       ::159        error 
 
 This allows more readable logs, and/or pretty forwarded messages (to papertrail/slack/splunk etc)
@@ -50,10 +55,12 @@ This allows more readable logs, and/or pretty forwarded messages (to papertrail/
 
 ## All commands:
 
-    hubot syslog                           - get overview of filters 
-    hubot syslog config [variable] [value] - show [or edit] filter config
-    hubot syslog add <id> [regex]          - add filter (or enable in current query/channel)
-    hubot syslog remove <id>               - stop and remove a filter 
+   hubot syslog                           - get overview of filters 
+   hubot syslog config [variable] [value] - show/edit filter config
+   hubot syslog add <id> [regex]          - add filter
+   hubot syslog remove <id>               - stop and remove a filter 
+   hubot syslog enable <id>               - start monitoring in current channel/query 
+   hubot syslog disable <id>              - stop monitoring in current channel/query 
 
 ## Forward messages / Backup / Files
 
@@ -72,8 +79,8 @@ Just add their syslog-serverinfo like this:
 This plugin should work out of the box with your existing setup.
 However, here's a quick tryout scenario:
 
-    $ npm install hubot-syslog
-    $ cd node_modules/hubot-syslog
+    $ npm install hubot-syslogd
+    $ cd node_modules/hubot-syslogd
     $ npm install --dev
     $ ONLINE=1 test/test.bash
 

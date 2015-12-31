@@ -6,8 +6,10 @@
 # Commands:
 #   hubot syslog                           - get overview of filters 
 #   hubot syslog config [variable] [value] - show/edit filter config
-#   hubot syslog add <id> [regex]          - add filter (or enable filter in channel/query) 
+#   hubot syslog add <id> [regex]          - add filter
 #   hubot syslog remove <id>               - stop and remove a filter 
+#   hubot syslog enable <id>               - start monitoring in current channel/query 
+#   hubot syslog disable <id>              - stop monitoring in current channel/query 
 #
 # Author:
 #   Leon van Kammen
@@ -19,6 +21,9 @@ unflat    = require('flat').unflatten
 logserver = require 'syslogd-middleware'
 syslogclient = require("syslog-client");
 dns       = require 'dns'
+_         =
+  array_remove: (arr,value) -> (x for x in arr when x != value )
+  isroom: (msg) ->( msg.envelope?.room? and msg.envelope.room.length )
 
 if not process.env.DEBUG? # *FIXME* syslog-client does a console.dir :(
   console.dir = () -> f=f 
@@ -40,8 +45,9 @@ logserver.outputs.push ( (app,data) ->
         if parts[1]? and String(data.message).match new RegExp(parts[1], modifiers )
           # send to channels
           for output in filter.output
-            output.user.name = filtername if output.user?.name? and output.room?
-            output.message.user.name = filtername if output.message.user?.name? and output.room?
+            if output.user?.name? and output.room?
+              output.user.name = filtername             # override username
+              output.message.user.name = filtername     # otherwise hubot wants to message the user too
             logserver.robot.reply output, String(data.message) 
           # Forward to remote services
           for forward in filter.forward
@@ -115,13 +121,40 @@ module.exports = (robot) ->
     logserver.robot = robot
     logserver.config = config
 
+  enable = (id,msg) ->
+    roomexist = false; userexist = false 
+    if config.filter[ id ]?
+      for output in config.filter[ id ].output
+        roomexist = true if output.room? and output.room == msg.envelope.room
+        userexist = true if not _.isroom(msg) and output.user?.name? and output.user.name == msg.envelope.user.name
+      if not roomexist or not userexist 
+        config.filter[ id ].output.push msg.envelope 
+        msg.send "enabled '"+id+"' for "+ msg.envelope.room || msg.envelope.user.name
+      else
+        msg.send "already enabled"
+    else msg.send "filter '"+id+"' does not exist..use 'syslog add' first"
+
+  disable = (id,msg) ->
+    roomexist = false; userexist = false 
+    if config.filter[ id ]?
+      deleted = false
+      for output in config.filter[ id ].output
+        matches_room = ( output.room? and output.room == msg.envelope.room )
+        matches_user = ( not _.isroom(msg) and output.user?.name? and output.user.name == msg.envelope.user.name )
+        if matches_room or matches_user
+          config.filter[ id ].output = _.array_remove config.filter[ id ].output, output 
+          deleted = true
+      if deleted 
+        msg.send "disabled '"+id+"' for "+ msg.envelope.room || msg.envelope.user.name
+    else msg.send "filter '"+id+"' does not exist..use 'syslog add' first"
+
   robot.respond /syslog$/i, (msg) ->
     filters = []
     for k,v of config.filter
       outputs = []
       for output in v.output
-        outputs.push output.message.room  if output.message?.room?
-        outputs.push output.user.name     if output.user?.name?
+        outputs.push output.message.room  if _.isroom(output) and output.message?.room?
+        outputs.push output.user.name     if not _.isroom(output) and output.user?.name?
       filters.push
         id: k
         regex: v.regex
@@ -141,20 +174,21 @@ module.exports = (robot) ->
     if not config.filter[ id ]?
       config.filter[ id ] =
         regex: regex
-        output: [ msg.envelope ]
+        output: []
         forward: ["udp://hostname:port"]
       console.log JSON.stringify(config,null,2) if process.env.DEBUG?
       robot.brain.set 'syslog', config
-    else 
-      roomexist = false; userexist = false 
-      for output in config.filter[ id ].output
-        roomexist = true if output.room? and output.room == msg.envelope.room
-        userexist = true if output.user?.name? and output.user.name == msg.envelope.user.name
-      if not roomexist or not userexist 
-        config.filter[ id ].output.push msg.envelope 
-        msg.send "added to filter '"+id+"'"
-      else
-        msg.send "already added"
+    else msg.send "already exists"
+
+  robot.respond /syslog enable (\S+)$/i, (msg) ->
+    id = msg.match[1]
+    enable id,msg
+    console.dir config
+  
+  robot.respond /syslog disable (\S+)$/i, (msg) ->
+    id = msg.match[1]
+    disable id,msg
+    console.dir config
 
   robot.respond /syslog remove (.*)/i, (msg) ->
     args = msg.match[1].split(" ")
