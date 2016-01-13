@@ -1,3 +1,20 @@
+# Description:
+#   interface to syslog 
+#
+# Dependencies: easy-table, syslogd-middleware
+#
+# Commands:
+#   hubot syslog                           - get overview of filters 
+#   hubot syslog config [variable] [value] - show/edit filter config
+#   hubot syslog add <id> [regex]          - add filter
+#   hubot syslog remove <id>               - stop and remove a filter 
+#   hubot syslog enable <id>               - start monitoring in current channel/query 
+#   hubot syslog disable <id>              - stop monitoring in current channel/query 
+#
+# Author:
+#   Leon van Kammen
+#
+
 logserver    = require 'syslogd-middleware'
 syslogclient = require("syslog-client");
 dns          = require 'dns'
