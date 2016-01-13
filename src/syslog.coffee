@@ -23,11 +23,6 @@ protocol_get = (type,str) ->
   return str.split("://")[0]            if type is "protocol"
   return str.split("://")[1].split(":") if type is "server"
 
-_ = 
-  setname = (name,envelope) ->
-    envelope.user.name = filtername         
-    envelope.message.user.name = filtername 
-
 module.exports = (robot) ->
 
   if not process.env.DEBUG? # *FIXME* syslog-client does a console.dir :(
@@ -53,8 +48,11 @@ module.exports = (robot) ->
 
   logserver.send_to_channels = (app, data, filtername, filter) ->
     for output in filter.output
+      setname = (name,envelope) ->
+        envelope.user.name = filtername         
+        envelope.message.user.name = filtername 
       # override username otherwise hubot wants to message the user too
-      _.setname filtername, output if output.user?.name? and output.room?
+      setname filtername, output if output.user?.name? and output.room?
       logserver.robot.reply output, String(data.message) 
 
   logserver.forward = (app, data, filtername, filter ) -> 
