@@ -14,7 +14,7 @@
     "easy-table": "^1.0.0",
     "flat": "^1.6.0",
     "syslog-client": "^1.0.6",
-    "syslogd-middleware": "1.1.0"
+    "syslogd-middleware": "1.1.1"
   },
   "keywords": [
     "hubot",
