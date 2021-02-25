@@ -23,15 +23,26 @@ First tell hubot which regex to watch by typing to hubot:
    
 Then invite hubot to a channel, or add him to a private chat, and type this:
 
-    hubot enable errors
+    hubot syslog enable errors
 
-and then send a syslog message using a [PHP](https://github.com/coderofsalvation/syslog-flexible) / [JS](https://npmjs.org/syslog-client) syslog client, or on unix:
+and then send a UDP+TCP syslog message using a [PHP](https://github.com/coderofsalvation/syslog-flexible) / [JS](https://npmjs.org/syslog-client) syslog client, or on unix:
   
-    $ logger -d -n localhost -P 1338 -p local3.info hello this is an error 
+    $ logger -d --rfc3164 -n localhost -P 1338 -p local3.info hello this is an error 
+    $ logger -T --rfc3164 -n localhost -P 1339 -p local3.info hello this is an error  
 
 > Voila! It'll show up in the chat since it matched the regex :)
 
     [15:29] <hubot> errors: hello this is an error 
+
+> See [syslog-middleware](https://github.com/coderofsalvation/syslog-middleware/) on how to send syslog using nodejs [winston](https://npmjs.org/winston), or simply forward
+your console using [sysconsole](@divine/sysconsole):
+
+```javascript
+import { SysConsole } from '@divine/sysconsole';
+SysConsole.replaceConsole({ loghost: 'localhost', logport:1339,   facility: 'local0',  title: 'MySweetApp',  showFile: true,  syslogTags: true, showFunc:true,   highestLevel: 'info',  tcpTimeout:1000 })
+console.log("hoi error") 
+console.warn("hoi error") 
+```
 
 ## Email alerts anyone?
 

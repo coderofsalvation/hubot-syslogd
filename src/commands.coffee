@@ -7,7 +7,6 @@ _         =
 
 module.exports = (robot) ->
 
-  console.log "ja"
   config = false
   syslog = 
     usage:

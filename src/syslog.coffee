@@ -1,22 +1,22 @@
 # Description:
 #   interface to syslog 
 #
-# Dependencies: easy-table, syslogd-middleware
-#
 # Commands:
-#   hubot syslog                           - get overview of filters 
-#   hubot syslog config [variable] [value] - show/edit filter config
-#   hubot syslog add <id> [regex]          - add filter
+#   hubot syslog - get overview of filters 
+#   hubot syslog config [variable] [value] - show [or edit] filter config
+#   hubot syslog add <filter> [regex]      - add filter
 #   hubot syslog remove <id>               - stop and remove a filter 
 #   hubot syslog enable <id>               - start monitoring in current channel/query 
 #   hubot syslog disable <id>              - stop monitoring in current channel/query 
+#
+# Dependencies: easy-table, syslogd-middleware
 #
 # Author:
 #   Leon van Kammen
 #
 
 logserver    = require 'syslogd-middleware'
-syslogclient = require("syslog-client");
+syslogclient = require("syslog-client")
 dns          = require 'dns'
 nop          = () ->
 protocol_get = (type,str) ->
@@ -49,18 +49,18 @@ module.exports = (robot) ->
   logserver.send_to_channels = (app, data, filtername, filter) ->
     for output in filter.output
       setname = (name,envelope) ->
-        envelope.user.name = filtername         
-        envelope.message.user.name = filtername 
+        envelope.user.name = filtername
+        envelope.message.user.name = filtername
       # override username otherwise hubot wants to message the user too
       setname filtername, output if output.user?.name? and output.room?
-      logserver.robot.reply output, String(data.message) 
+      logserver.robot.reply output, String(data.message)
 
-  logserver.forward = (app, data, filtername, filter ) -> 
+  logserver.forward = (app, data, filtername, filter ) ->
     for forward in filter.forward
       continue if forward == "udp://hostname:port"
       logserver.forwarder = {} if not logserver.forwarder
       if not logserver.forwarder[ forward ]?
-        logserver.forward_syslog  forward, 
+        logserver.forward_syslog  forward,
                                   protocol_get("server",str), 
                                   protocol_get("protocol",str)
       console.log "forward::"+forward if process.env.DEBUG?
