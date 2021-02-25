@@ -1,3 +1,5 @@
+> deprecated in favor of log4js and/or netdata
+
 Pre-massage/route log messages before sending them to Splunk/Papertrail/Logsene etc.
 
 ![Build Status](https://travis-ci.org/coderofsalvation/hubot-syslogd.svg?branch=master)
